@@ -1,18 +1,24 @@
 import fs from 'fs';
 import chalk from 'chalk';
 
+function extraiLinks(texto) {
+    const regex = /\[([^\[\]]*?)\]\((https?:\/\/[^\s?#.].[^\s]*)\)/gm;
+    const capturas = [...texto.matchAll(regex)];
+    const resultados = capturas.map(captura => ({[captura[1]]: captura[2]}));
+    return resultados.length !== 0 ? resultados : "Nao há links no arquivo!";
+}
+
 function trataErro(erro) {
     console.log(erro);
     throw new Error(chalk.red(erro.code, 'Não há arquivo no diretório'));
 }
 
 //função com async/await
-
 async function pegaArquivo(caminhoDoArquivo) {
     try {
         const encoding = 'utf-8';
         const texto = await fs.promises.readFile(caminhoDoArquivo, encoding);
-        console.log(chalk.green(texto));
+        return extraiLinks(texto);
     } catch(erro) {
         trataErro(erro);
     } finally {
@@ -20,14 +26,11 @@ async function pegaArquivo(caminhoDoArquivo) {
       }
 }
 
-//funcao assincrona utiliza o PROMISES com then()
-// function pegaArquivo(caminhoDoArquivo) {
-//     const encoding = 'utf-8';
-//     fs.promises
-//       .readFile(caminhoDoArquivo, encoding)
-//       .then((texto) => console.log(chalk.green(texto)))
-//       .catch((erro) => trataErro(erro));
-// }
+export default pegaArquivo;
 
+// \[[^\[\]]*?\]
 
-pegaArquivo('./arquivos/texto.md');
+// \(https?:\/\/[^\s?#.].[^\s]*\)
+
+//regex101
+// \[([^\[\]]*?)\]\((https?:\/\/[^\s?#.].[^\s]*)\)
